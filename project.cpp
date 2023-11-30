@@ -10,31 +10,34 @@
 int logiTime; // check logical time
 bool visited[10][10]; 
 int map[10][10]; //map
-int road[10][10];
+int dx[4]={1,-1,0,0};
+int dy[4]={0,0,1,-1};
 int roadCnt; // count contiued walls
 typedef struct drunkMan
 {
-    int location[2];  //location of drunkMan
+    int location[10][10];  //location of drunkMan
     int quad;    // location of obj in quadrant
-
+    bool visitedQuad[4];
     
 }drunkMan;
 typedef struct sniper
 {
     int quad;
-    int location[2];
+    int location[10][10];
 
 }sniper;
 typedef struct wife
 {
     int quad;
-    int location[2];
+    int location[10][10];
+    int around[10][10];
 
 }wife;
 typedef struct home
 {
     int quad;
-    int location[2];
+    int location[10][10];
+
 }home;
 
 void tmpmain(); //tmp main
@@ -43,11 +46,15 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h); // Set object l
 void randomWall();
 int where(int x,int y);
 int cntWall(int quad);
-bool verifyWall(int x,int y); //Whether the walls are made up of five in a row
+void verifyWall(int x,int y); //Whether the walls are made up of five in a row
+void printMap();
+int rangeX(int quad);
+int rangeY(int quad);
+
 int main()
     {
         tmpmain();
-        
+        std::cout<<"chk";
         while(1){};
         return 0;
     }
@@ -64,6 +71,7 @@ void tmpmain()
         randomWall();
         locationSet(&man,&sni,&w,&h);
         move(speed,&man,&sni,&w,&h);
+        printMap();
 
     }
 
@@ -77,18 +85,29 @@ int move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
     }
 void randomWall()
 {
-    int cnt[4]={0},x,y,cntSum,wStore;
+    int x,y,cntSum=0,wStore,rWall=0;
 
-    while(cntSum<26)
+    while(cntSum<26) 
     {
         x=rand()%10;
         y=rand()%10;
+        cntSum=0;
+        
         wStore=where(x,y);
-        if(cntWall(wStore)<9)
+        if(cntWall(wStore)<9&& map[x][y]==0)
         {
             map[x][y]=1;
         }
-        
+        for(int i=1;i<5;++i)
+            {
+                cntSum+=cntWall(i);
+            }
+        roadCnt=0;
+        for(int i=0;i<10;++i)
+            {
+                memset(visited[i],0,sizeof(int)*10);
+            }
+        verifyWall(x,y);
     }
 
 }
@@ -173,9 +192,149 @@ int cntWall(int quad) //count the number of walls in the quadrant
 
 void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
 {
-
+    int rx,ry,wStore;
+    rx=rand()%10;
+    ry=rand()%10;
+    wStore=where(rx,ry);
+    while(map[rx][ry]==1) //set man location
+    {
+        rx=rand()%10;
+        ry=rand()%10;
+        wStore=where(rx,ry);
+    }
+    man->location[rx][ry];
+    man->quad=wStore;
+    for(int i=0;i<4;++i)
+        {
+            if(man->quad==i+1)
+            {
+                wStore=4-i;
+                h->quad=wStore;
+            }
+        }
+    rx=rangeX(h->quad); //set h location
+    ry=rangeY(h->quad);
+    while(map[rx][ry]==1 )
+        {
+            rx=rangeX(h->quad);
+            ry=rangeY(h->quad);
+        }
+    h->location[rx][ry];
+    for(int i=1;i<=4;++i)
+        {
+            wStore=i;
+            if(man->quad!=wStore && h->quad!=wStore)
+                {
+                    w->quad=wStore;
+                }
+        }
+    rx=rangeX(w->quad); //set wife location
+    ry=rangeY(w->quad);
+    while(map[rx][ry]==1)
+        {
+            rx=rangeX(w->quad);
+            ry=rangeY(w->quad);
+        }
+    w->location[rx][ry];
+    for(int i=1;i<=4;++i)
+        {
+            wStore=i;
+            if(man->quad!=wStore && h->quad!=wStore && w->quad!=wStore)
+                {
+                    sni->quad=wStore;
+                }
+        }
+    rx=rangeX(sni->quad);
+    ry=rangeY(sni->quad);
+    while(map[rx][ry]==0)
+        {
+            rx=rangeX(sni->quad);
+            ry=rangeY(sni->quad);
+        }
+    sni->location[rx][ry];
 }
-bool verifyWall(int x,int y)
+void verifyWall(int x,int y)
 {
+    visited[x][y]=1;
+    int ax,by,i=0;
+    while(i<4)
+        {
+            ax=x+dx[i];
+            by=y+dy[i];
+            if(ax>=10 || ax<0|| by>=10 || by<0) 
+            {
+                i++;
+            }
+            else if(visited[ax][by]==0 && map[ax][by]==1)
+                {
+                    roadCnt++;
+                    verifyWall(ax,by);
+                }
+            else
+            {
+                i++;
+            }
+        }
+    
 
 }
+void printMap()
+{
+    for(int i=0;i<10;++i)
+        {
+            for(int j=0;j<10;++j)
+                {
+                    if(map[i][j]==1)
+                    {
+                        printf("◼");
+                    }
+                    else
+                    {
+                        printf("□");
+                    }
+                }
+            printf("\n");
+        }
+}
+int rangeX(int quad)
+    {
+        int rx=rand()%10;
+        if(quad==1 || quad==2)
+            {
+                while(rx>=5)
+                    {
+                        rx=rand()%10;
+                    }
+                return rx;
+            }
+        if(quad==3 || quad==4)
+            {
+                while(rx<5)
+                    {
+                        rx=rand()%10;
+                    }
+                return rx;
+            }
+        return 0;
+    }
+int rangeY(int quad)
+    {
+        int ry=rand()%10;
+        if(quad==1||quad==2)
+            {
+                while(ry>=5)
+                    {
+                        ry=rand()%10;
+                    }
+                return  ry;
+            }
+        if(quad==3||quad==4)
+            {
+                while(ry<5)
+                    {
+                        ry=rand()%10;
+                    }
+                return ry;
+            }
+        return 0;
+    }
