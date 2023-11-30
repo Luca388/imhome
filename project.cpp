@@ -225,7 +225,7 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
     for(int i=1;i<=4;++i)
         {
             wStore=i;
-            if(man->quad!=wStore && h->quad!=wStore)
+            if(man->quad!=wStore && h->quad==wStore)
                 {
                     w->quad=wStore;
                 }
@@ -248,7 +248,7 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
         }
     rx=rangeX(sni->quad);
     ry=rangeY(sni->quad);
-    while(map[rx][ry]==0)
+    while(map[rx][ry]==0 )
         {
             rx=rangeX(sni->quad);
             ry=rangeY(sni->quad);
@@ -292,10 +292,27 @@ void printMap()
                     {
                         printf("◼");
                     }
-                    else
+                    if(map[i][j]==0)
                     {
                         printf("□");
                     }
+                    if(map[i][j]== -1)
+                        {
+                            printf("M");
+                        }
+                    if(map[i][j]== -2)
+                        {
+                            printf("H");
+                        }
+                    if(map[i][j]== -3)
+                        {
+                            printf("W");
+                        }
+                    if(map[i][j]== -4)
+                        {
+                            printf("10");
+                        }
+
                 }
             printf("\n");
         }
@@ -324,7 +341,7 @@ int rangeX(int quad)
 int rangeY(int quad)
     {
         int ry=rand()%10;
-        if(quad==1||quad==2)
+        if(quad==1||quad==3)
             {
                 while(ry>=5)
                     {
@@ -332,7 +349,7 @@ int rangeY(int quad)
                     }
                 return  ry;
             }
-        if(quad==3||quad==4)
+        if(quad==2||quad==4)
             {
                 while(ry<5)
                     {
