@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include<termios.h>
-
-
+#define lman -1
+#define lhome -2
+#define lwife -3
+#define lsni -4
 int logiTime; // check logical time
 bool visited[10][10]; 
 int map[10][10]; //map
@@ -15,7 +17,6 @@ int dy[4]={0,0,1,-1};
 int roadCnt; // count contiued walls
 typedef struct drunkMan
 {
-    int location[10][10];  //location of drunkMan
     int quad;    // location of obj in quadrant
     bool visitedQuad[4];
     
@@ -23,20 +24,19 @@ typedef struct drunkMan
 typedef struct sniper
 {
     int quad;
-    int location[10][10];
+    int location[2];
 
 }sniper;
 typedef struct wife
 {
     int quad;
-    int location[10][10];
     int around[10][10];
 
 }wife;
 typedef struct home
 {
     int quad;
-    int location[10][10];
+    int location[2];
 
 }home;
 
@@ -202,7 +202,7 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
         ry=rand()%10;
         wStore=where(rx,ry);
     }
-    man->location[rx][ry];
+    map[rx][ry]=lman;
     man->quad=wStore;
     for(int i=0;i<4;++i)
         {
@@ -219,7 +219,9 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
             rx=rangeX(h->quad);
             ry=rangeY(h->quad);
         }
-    h->location[rx][ry];
+    map[rx][ry]=lhome;
+    h->location[0]=rx;
+    h->location[1]=ry;
     for(int i=1;i<=4;++i)
         {
             wStore=i;
@@ -235,7 +237,7 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
             rx=rangeX(w->quad);
             ry=rangeY(w->quad);
         }
-    w->location[rx][ry];
+    map[rx][ry]=lwife;
     for(int i=1;i<=4;++i)
         {
             wStore=i;
@@ -251,7 +253,9 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
             rx=rangeX(sni->quad);
             ry=rangeY(sni->quad);
         }
-    sni->location[rx][ry];
+    map[rx][ry]=lsni;
+    sni->location[0]=rx;
+    sni->location[1]=ry;
 }
 void verifyWall(int x,int y)
 {
