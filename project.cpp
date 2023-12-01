@@ -44,7 +44,7 @@ typedef struct home
 }home;
 
 void tmpmain(); //tmp main
-int move(int speed,drunkMan * man,sniper * sni,wife * w,home * h); //defines the movement of an object
+void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h); //defines the movement of an object
 void locationSet(drunkMan * man,sniper * sni,wife * w,home * h); // Set object location
 void randomWall();
 int where(int x,int y);
@@ -83,38 +83,33 @@ void tmpmain()
 
     }
 
-int move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
+void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
     {
-        int rx,ry,ox,oy,wStore,wStoretwo=1;
+        int rx,ry,ox,oy;
+        
         while(man->status==1)
             {
                 printMap();
                 logiTime++;
                 ox=man->location[0];
                 oy=man->location[1];
-                wStore=where(ox,oy);
-                man->quad=wStore;
-                if(man->visitedQuad[wStoretwo-1]!=1)
+                map[ox][oy]=0;
+                randomGo(&rx,&ry);
+                rx=rx+ox;
+                ry=ry+oy;
+                man->quad=where(ox,oy);
+                while((rx<0||rx>9||ry<0||ry>9)|| map[rx][ry]==1)
                     {
-                        
-                        map[ox][oy]=0;
+                
                         randomGo(&rx,&ry);
-                        rx=ox+rx;
-                        ry=oy+ry;
-                        while(rx<0||rx>9|| ry<0|| ry>9 || map[rx][ry]==1||man->visitedQuad[wStoretwo]!=1) 
-                            {
-                                randomGo(&rx,&ry);
-                                rx=ox+rx;
-                                ry=oy+ry;
-                                    
-                            }
-                        map[rx][ry]=lman;
-                        man->location[0]=rx;
-                        man->location[1]=ry;
-                        wStoretwo=where(rx,ry);
-                        man->quad=wStoretwo;
+                        rx=rx+ox;
+                        ry=ry+oy;
+                      
                     }
-                wStoretwo=where(rx,ry);
+                
+                map[rx][ry]=lman;
+                man->location[0]=rx;
+                man->location[1]=ry;
                 if(man->quad==h->quad)
                     {
                         for(int i=0;i<4;++i)
@@ -128,7 +123,8 @@ int move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                 if(man->location[0]==h->location[0]&&man->location[1]==h->location[1])
                     {
                         man->status=0;
-                        printf("무사히 집에 잘 도착했습니다\n");
+                        printf("\n무사히 집에 잘 도착했습니다\n");
+                        return;
                     }  
 
                 sleep(3/speed);
@@ -137,7 +133,7 @@ int move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
         
         
         
-        return 0;
+        return;
     }
 void randomWall()
 {
@@ -422,28 +418,31 @@ int rangeY(int quad)
 void randomGo(int * rx,int * ry )
     {
 
-        srand(time(NULL));
-        int d=rand()%100+1;
-        
-        
-        if(d>0 &&d>=25)
+        int d=rand()%4+1;
+        if(d==1)
         {
             *rx= -1;
             *ry=0;
+            return;
         }
-        if(d>26&&d<=50)
-            {
-                *rx=0;
-                *ry=1;
-            }
-        if(d>50&&d<=75)
+        if(d==2)
             {
                 *rx=1;
                 *ry=0;
+                return;
             }
-        if(d>75&&d<=100)
+        if(d==3)
+            {
+                *rx=0;
+                *ry=1;
+                return;
+            }
+        if(d==4)
             {
                 *rx=0;
                 *ry= -1;
+                return;
             }
+
+        
     }
