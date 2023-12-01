@@ -19,6 +19,8 @@ typedef struct drunkMan
 {
     int quad;    // location of obj in quadrant
     bool visitedQuad[4];
+    int status;
+    int location[2];
     
 }drunkMan;
 typedef struct sniper
@@ -31,6 +33,7 @@ typedef struct wife
 {
     int quad;
     int around[10][10];
+    int location[2];
 
 }wife;
 typedef struct home
@@ -50,11 +53,11 @@ void verifyWall(int x,int y); //Whether the walls are made up of five in a row
 void printMap();
 int rangeX(int quad);
 int rangeY(int quad);
-
+void randomGo(int *rx,int * ry);
 int main()
     {
         tmpmain();
-        std::cout<<"chk";
+        
         while(1){};
         return 0;
     }
@@ -65,22 +68,75 @@ void tmpmain()
         printf("speed:");
         scanf("%d",&speed);
         drunkMan man;
+        man.status=1;
+        for(int i=0;i<4;++i)
+            {
+                man.visitedQuad[i]=0;
+            }
         wife w;
         sniper sni;
         home h;
         randomWall();
         locationSet(&man,&sni,&w,&h);
         move(speed,&man,&sni,&w,&h);
-        printMap();
+        
 
     }
 
 int move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
     {
+        int rx,ry,ox,oy,wStore,wStoretwo=1;
+        while(man->status==1)
+            {
+                printMap();
+                logiTime++;
+                ox=man->location[0];
+                oy=man->location[1];
+                wStore=where(ox,oy);
+                man->quad=wStore;
+                if(man->visitedQuad[wStoretwo-1]!=1)
+                    {
+                        
+                        map[ox][oy]=0;
+                        randomGo(&rx,&ry);
+                        rx=ox+rx;
+                        ry=oy+ry;
+                        while(rx<0||rx>9|| ry<0|| ry>9 || map[rx][ry]==1||man->visitedQuad[wStoretwo]!=1) 
+                            {
+                                randomGo(&rx,&ry);
+                                rx=ox+rx;
+                                ry=oy+ry;
+                                    
+                            }
+                        map[rx][ry]=lman;
+                        man->location[0]=rx;
+                        man->location[1]=ry;
+                        wStoretwo=where(rx,ry);
+                        man->quad=wStoretwo;
+                    }
+                wStoretwo=where(rx,ry);
+                if(man->quad==h->quad)
+                    {
+                        for(int i=0;i<4;++i)
+                            {
+                                if(h->quad!=i+1)
+                                    {
+                                        man->visitedQuad[i]=1;
+                                    }
+                            }
+                    }
+                if(man->location[0]==h->location[0]&&man->location[1]==h->location[1])
+                    {
+                        man->status=0;
+                        printf("무사히 집에 잘 도착했습니다\n");
+                    }  
 
-        int r=rand()%4;
-
-        logiTime++;
+                sleep(3/speed);
+                system("clear");
+            }
+        
+        
+        
         return 0;
     }
 void randomWall()
@@ -203,6 +259,8 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
         wStore=where(rx,ry);
     }
     map[rx][ry]=lman;
+    man->location[0]=rx;
+    man->location[1]=ry;
     man->quad=wStore;
     for(int i=0;i<4;++i)
         {
@@ -238,6 +296,8 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
             ry=rangeY(w->quad);
         }
     map[rx][ry]=lwife;
+    w->location[0]=rx;
+    w->location[1]=ry;
     for(int i=1;i<=4;++i)
         {
             wStore=i;
@@ -310,7 +370,7 @@ void printMap()
                         }
                     if(map[i][j]== -4)
                         {
-                            printf("10");
+                            printf("0");
                         }
 
                 }
@@ -358,4 +418,32 @@ int rangeY(int quad)
                 return ry;
             }
         return 0;
+    }
+void randomGo(int * rx,int * ry )
+    {
+
+        srand(time(NULL));
+        int d=rand()%100+1;
+        
+        
+        if(d>0 &&d>=25)
+        {
+            *rx= -1;
+            *ry=0;
+        }
+        if(d>26&&d<=50)
+            {
+                *rx=0;
+                *ry=1;
+            }
+        if(d>50&&d<=75)
+            {
+                *rx=1;
+                *ry=0;
+            }
+        if(d>75&&d<=100)
+            {
+                *rx=0;
+                *ry= -1;
+            }
     }
