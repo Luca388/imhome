@@ -94,22 +94,32 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                 ox=man->location[0];
                 oy=man->location[1];
                 map[ox][oy]=0;
-                randomGo(&rx,&ry);
-                rx=rx+ox;
-                ry=ry+oy;
-                man->quad=where(ox,oy);
-                while((rx<0||rx>9||ry<0||ry>9)|| map[rx][ry]==1)
+                rx=0;
+                ry=0;
+                if(man->visitedQuad[where(rx,ry)-1]!=1)
+                {
+                    randomGo(&rx,&ry);
+                    rx=rx+ox;
+                    ry=ry+oy;
+                    man->quad=where(ox,oy);
+                }
+                while((rx<0||rx>9||ry<0||ry>9)|| map[rx][ry]==1 || man->visitedQuad[where(rx,ry)-1]==1)
                     {
                 
                         randomGo(&rx,&ry);
                         rx=rx+ox;
                         ry=ry+oy;
-                      
+
                     }
                 
                 map[rx][ry]=lman;
                 man->location[0]=rx;
                 man->location[1]=ry;
+                man->quad=where(rx,ry);
+                if(where(rx,ry)!=where(ox,oy))
+                    {
+                        man->visitedQuad[where(ox,oy)-1]=1;
+                    }
                 if(man->quad==h->quad)
                     {
                         for(int i=0;i<4;++i)
@@ -127,7 +137,7 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                         return;
                     }  
 
-                sleep(3/speed);
+                sleep(5/speed);
                 system("clear");
             }
         
