@@ -15,6 +15,8 @@ int map[10][10]; //map
 int dx[4]={1,-1,0,0};
 int dy[4]={0,0,1,-1};
 int roadCnt; // count contiued walls
+int Xquad(int quad);
+int Yquad(int quad);
 typedef struct drunkMan
 {
     int quad;    // location of obj in quadrant
@@ -54,6 +56,7 @@ void printMap();
 int rangeX(int quad);
 int rangeY(int quad);
 void randomGo(int *rx,int * ry);
+void thirdRandom(int secondQuad);
 int main()
     {
         tmpmain();
@@ -79,13 +82,17 @@ void tmpmain()
         randomWall();
         locationSet(&man,&sni,&w,&h);
         move(speed,&man,&sni,&w,&h);
-        
+
 
     }
 
 void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
     {
-        int rx,ry,ox,oy;
+        int rx,ry,ox,oy,secondQuad=rand()%4+1;
+        while(secondQuad==man->quad||secondQuad==sni->quad||secondQuad==w->quad)
+            {
+                secondQuad=rand()%4+1;
+            }
         
         while(man->status==1)
             {
@@ -130,6 +137,11 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                                     }
                             }
                     }
+                if(man->quad==secondQuad)
+                    {
+                        thirdRandom(secondQuad);
+                    }
+
                 if(man->location[0]==h->location[0]&&man->location[1]==h->location[1])
                     {
                         man->status=0;
@@ -456,3 +468,63 @@ void randomGo(int * rx,int * ry )
 
         
     }
+void thirdRandom(int secondQuad)
+{
+    int rx,ry;
+    static int oTime=logiTime;
+    rx=Xquad(secondQuad);
+    ry=Yquad(secondQuad);
+    if(logiTime-oTime ==5)
+        {
+            while(where(rx,ry)!=secondQuad)
+                {
+                    rx=Xquad(secondQuad);
+                    ry=Yquad(secondQuad);
+                }
+            oTime=logiTime;
+            map[rx][ry]=0;
+        }
+}
+int Xquad(int quad)
+{
+    int rx;
+    rx=rand()%10;
+    if(quad==1||quad ==2)
+    {
+        while(rx>=5)
+            {
+                rx=rand()%10;
+            }
+        return rx;
+    }
+    if(quad==3||quad==4)
+        {
+            while(rx<5)
+                {
+                    rx=rand()%10;
+                }
+            return rx;
+        }
+    return 1;
+}
+int Yquad(int quad)
+{
+    int ry=rand()%10;
+    if(quad==1||quad==3)
+        {
+            while(ry>=5)
+                {
+                    ry=rand()%10;
+                }
+            return ry;
+        }
+    if(quad==2||quad==4)
+        {
+            while(ry<5)
+                {
+                    ry=rand()%10;
+                }
+            return ry;
+        }
+    return 1;
+}
