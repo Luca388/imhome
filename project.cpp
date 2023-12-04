@@ -10,10 +10,7 @@
 #define lwife -3
 #define lsni -4
 int logiTime; // check logical time
-
 int map[10][10]; //map
-
-
 typedef struct drunkMan
 {
     int quad;    // location of obj in quadrant
@@ -49,14 +46,14 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h); //defines th
 void locationSet(drunkMan * man,sniper * sni,wife * w,home * h); // Set object location
 int where(int x,int y);
 void printMap(sniper * sni);
-int rangeX(int quad);
-int rangeY(int quad);
 void randomGo(int *rx,int * ry);
 void second(drunkMan* man,sniper* sni);
-void thirdRandom(int secondQuad);
+void thirdRandom(int secondQuad,drunkMan* man);
 int Xquad(int quad);
 int Yquad(int quad);
+void four(drunkMan *man,wife *w);
 void mapSet();
+int cntWall(int secondQuad);
 int main()
     {
         tmpmain();
@@ -118,9 +115,7 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                         randomGo(&rx,&ry);
                         rx=rx+ox;
                         ry=ry+oy;
-
                     }
-                
                 map[rx][ry]=lman;
                 man->location[0]=rx;
                 man->location[1]=ry;
@@ -141,7 +136,7 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                     }
                 if(man->quad==secondQuad)
                     {
-                        thirdRandom(secondQuad);
+                        thirdRandom(secondQuad,man);
                     }
                 if(man->quad==sni->quad)
                     {
@@ -161,9 +156,6 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                 sleep(5/speed);
                 system("clear");
             }
-        
-        
-        
         return;
     }
 int where(int x,int y) // To find out where it is in the fourth quadrant
@@ -233,9 +225,9 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
                     w->quad=wStore;
                 }
         }
-            rx=Xquad(w->quad);
-            ry=Yquad(w->quad);
-    while(map[rx][ry]==1||where(rx,ry)!=w->quad)
+    rx=Xquad(w->quad);
+    ry=Yquad(w->quad);
+    while(map[rx][ry]==1||where(rx,ry)!=w->quad || (rx==h->location[0]&& ry==h->location[1]))
         {
             rx=Xquad(w->quad);
             ry=Yquad(w->quad);
@@ -304,10 +296,10 @@ void printMap(sniper * sni)
                                             {
                                                 printf("%d",i*10);
                                             }
-                                        else
-                                        {
-                                            printf("%d",0);
-                                        }
+                                    }
+                                if(sni->accuracy==10)
+                                    {
+                                        printf("0");
                                     }
                             }
                         }
@@ -315,6 +307,7 @@ void printMap(sniper * sni)
                 }
             printf("\n");
         }
+    printf("\n<< logi Time : %d>>\n",logiTime);
 }
 int rangeX(int quad)
     {
@@ -389,7 +382,7 @@ void randomGo(int * rx,int * ry )
 
         
     }
-void thirdRandom(int secondQuad) //thrid quad function
+void thirdRandom(int secondQuad,drunkMan* man) //thrid quad function
 {
     int rx,ry;
     static int oTime=logiTime;
@@ -397,12 +390,14 @@ void thirdRandom(int secondQuad) //thrid quad function
     ry=Yquad(secondQuad);
     if(logiTime-oTime ==5)
         {
-            while(where(rx,ry)!=secondQuad)
+            while((where(rx,ry)!=secondQuad || map[rx][ry]!=1 || (rx== man->location[0] && ry == man->location[1])
+             )&& cntWall(secondQuad)!=0 )
                 {
                     rx=Xquad(secondQuad);
                     ry=Yquad(secondQuad);
                 }
             oTime=logiTime;
+            sleep(1/2);
             map[rx][ry]=0;
         }
 }
@@ -505,7 +500,6 @@ void second(drunkMan * man,sniper* sni) //second sniper function
             {
                 rate=rand()%10+1;
                 printf("\n 못맞췄습니다!%d\n",sni->accuracy);
-                sleep(1);
             }
 
 
@@ -513,17 +507,7 @@ void second(drunkMan * man,sniper* sni) //second sniper function
     }
 void mapSet()
 {
-    int wall[10][10]={
-        {0,1,4},
-        {6,7,8},
-        {1,3,4},
-        {6,9},
-        {1,2,4},
-        {0},
-        {1,2,4,6,8},
-        {8},
-        {1,2,3,4,6,8},
-    };
+    int wall[10][10]={ {0,1,4}, {6,7,8}, {1,3,4}, {6,9}, {1,2,4}, {0}, {1,2,4,6,8}, {8},{1,2,3,4,6,8}};
     for(int i=0;i<10;++i)
         {
             for(int j=0;j<10;++j)
@@ -535,4 +519,73 @@ void mapSet()
                 }
         }
     map[0][0]=1;
+}
+void four(drunkMan *man,wife* w)
+{
+    
+
+}
+int cntWall(int secondQuad)
+{
+    int rx,ry,cnt=0;
+    rx=Xquad(secondQuad);
+    ry=Yquad(secondQuad);
+    while(where(rx,ry)!=secondQuad)
+        {
+            rx=Xquad(secondQuad);
+            ry=Yquad(secondQuad);
+        }
+    if(where(rx,ry)==1)
+        {
+            for(int i=0;i<5;++i)
+                {
+                    for(int j=0;j<5;++j)
+                        {
+                            if(map[i][j]==1)
+                                {
+                                    cnt++;
+                                }
+                        }
+                }
+        }
+    if(where(rx,ry)==2)
+        {
+            for(int i=0;i<5;++i)
+                {
+                    for(int j=0;j<5;++j)
+                        {
+                            if(map[i][9-j]==1)
+                                {
+                                    cnt++;
+                                }
+                        }
+                }
+        }
+    if(where(rx,ry)==3)
+        {
+           for(int i=0;i<5;++i)
+                {
+                    for(int j=0;j<5;++j)
+                        {
+                            if(map[9-i][j]==1)
+                                {
+                                    cnt++;
+                                }
+                        }
+                } 
+        }
+    if(where(rx,ry)==3)
+            {
+            for(int i=0;i<5;++i)
+                    {
+                        for(int j=0;j<5;++j)
+                            {
+                                if(map[9-i][9-j]==1)
+                                    {
+                                        cnt++;
+                                    }
+                            }
+                    } 
+            }
+    return cnt;
 }
