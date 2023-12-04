@@ -15,8 +15,8 @@ int map[10][10]; //map
 int dx[4]={1,-1,0,0};
 int dy[4]={0,0,1,-1};
 int roadCnt; // count contiued walls
-int Xquad(int quad);
-int Yquad(int quad);
+
+
 typedef struct drunkMan
 {
     int quad;    // location of obj in quadrant
@@ -29,6 +29,9 @@ typedef struct sniper
 {
     int quad;
     int location[2];
+    int around[8][2];
+    int cnt;
+    int accuracy;
 
 }sniper;
 typedef struct wife
@@ -36,7 +39,6 @@ typedef struct wife
     int quad;
     int around[10][10];
     int location[2];
-
 }wife;
 typedef struct home
 {
@@ -52,11 +54,14 @@ void randomWall();
 int where(int x,int y);
 int cntWall(int quad);
 void verifyWall(int x,int y); //Whether the walls are made up of five in a row
-void printMap();
+void printMap(sniper * sni);
 int rangeX(int quad);
 int rangeY(int quad);
 void randomGo(int *rx,int * ry);
+void second(drunkMan* man,sniper* sni);
 void thirdRandom(int secondQuad);
+int Xquad(int quad);
+int Yquad(int quad);
 int main()
     {
         tmpmain();
@@ -72,6 +77,7 @@ void tmpmain()
         scanf("%d",&speed);
         drunkMan man;
         man.status=1;
+        
         for(int i=0;i<4;++i)
             {
                 man.visitedQuad[i]=0;
@@ -79,6 +85,8 @@ void tmpmain()
         wife w;
         sniper sni;
         home h;
+        sni.cnt=0;
+        sni.accuracy=0;
         randomWall();
         locationSet(&man,&sni,&w,&h);
         move(speed,&man,&sni,&w,&h);
@@ -96,7 +104,7 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
         
         while(man->status==1)
             {
-                printMap();
+                printMap(sni);
                 logiTime++;
                 ox=man->location[0];
                 oy=man->location[1];
@@ -110,7 +118,8 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                     ry=ry+oy;
                     man->quad=where(ox,oy);
                 }
-                while((rx<0||rx>9||ry<0||ry>9)|| map[rx][ry]==1 || man->visitedQuad[where(rx,ry)-1]==1)
+                while((rx<0||rx>9||ry<0||ry>9)|| map[rx][ry]==1 || man->visitedQuad[where(rx,ry)-1]==1
+                ||map[rx][ry]==lsni||map[rx][ry]==lwife)
                     {
                 
                         randomGo(&rx,&ry);
@@ -140,6 +149,14 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                 if(man->quad==secondQuad)
                     {
                         thirdRandom(secondQuad);
+                    }
+                if(man->quad==sni->quad)
+                    {
+                        sni->cnt++;
+                    }
+                if(sni->cnt>=10 && man->quad==sni->quad)
+                    {
+                        second(man,sni);
                     }
 
                 if(man->location[0]==h->location[0]&&man->location[1]==h->location[1])
@@ -280,6 +297,7 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
     man->location[0]=rx;
     man->location[1]=ry;
     man->quad=wStore;
+    //home section
     for(int i=0;i<4;++i)
         {
             if(man->quad==i+1)
@@ -288,16 +306,17 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
                 h->quad=wStore;
             }
         }
-    rx=rangeX(h->quad); //set h location
-    ry=rangeY(h->quad);
-    while(map[rx][ry]==1 )
+    rx=Xquad(h->quad);
+    ry=Yquad(h->quad);
+    while(map[rx][ry]==1 ||where(rx,ry)!=h->quad )
         {
-            rx=rangeX(h->quad);
-            ry=rangeY(h->quad);
+            rx=Xquad(h->quad);
+            ry=Yquad(h->quad);
         }
     map[rx][ry]=lhome;
     h->location[0]=rx;
     h->location[1]=ry;
+    // wife section
     for(int i=1;i<=4;++i)
         {
             wStore=i;
@@ -306,16 +325,17 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
                     w->quad=wStore;
                 }
         }
-    rx=rangeX(w->quad); //set wife location
-    ry=rangeY(w->quad);
-    while(map[rx][ry]==1)
+            rx=Xquad(w->quad);
+            ry=Yquad(w->quad);
+    while(map[rx][ry]==1||where(rx,ry)!=w->quad)
         {
-            rx=rangeX(w->quad);
-            ry=rangeY(w->quad);
+            rx=Xquad(w->quad);
+            ry=Yquad(w->quad);
         }
     map[rx][ry]=lwife;
     w->location[0]=rx;
     w->location[1]=ry;
+    //sniper section
     for(int i=1;i<=4;++i)
         {
             wStore=i;
@@ -324,12 +344,12 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
                     sni->quad=wStore;
                 }
         }
-    rx=rangeX(sni->quad);
-    ry=rangeY(sni->quad);
-    while(map[rx][ry]==0 )
+    rx=Xquad(sni->quad);
+    ry=Yquad(sni->quad);
+    while(map[rx][ry]==0 || where(rx,ry)!=sni->quad)
         {
-            rx=rangeX(sni->quad);
-            ry=rangeY(sni->quad);
+            rx=Xquad(sni->quad);
+            ry=Yquad(sni->quad);
         }
     map[rx][ry]=lsni;
     sni->location[0]=rx;
@@ -360,7 +380,7 @@ void verifyWall(int x,int y)
     
 
 }
-void printMap()
+void printMap(sniper * sni)
 {
     for(int i=0;i<10;++i)
         {
@@ -374,21 +394,34 @@ void printMap()
                     {
                         printf("□");
                     }
-                    if(map[i][j]== -1)
+                    if(map[i][j]== lman)
                         {
                             printf("M");
                         }
-                    if(map[i][j]== -2)
+                    if(map[i][j]== lhome)
                         {
                             printf("H");
                         }
-                    if(map[i][j]== -3)
+                    if(map[i][j]== lwife)
                         {
                             printf("W");
                         }
-                    if(map[i][j]== -4)
+                    if(map[i][j]== lsni)
                         {
-                            printf("0");
+                            if(sni->accuracy==0)
+                                {
+                                    printf("0");
+                                }
+                            else
+                            {
+                                for(int i=1;i<=10;++i)
+                                    {
+                                        if(sni->accuracy==i)
+                                            {
+                                                printf("%d",i*10);
+                                            }
+                                    }
+                            }
                         }
 
                 }
@@ -468,7 +501,7 @@ void randomGo(int * rx,int * ry )
 
         
     }
-void thirdRandom(int secondQuad)
+void thirdRandom(int secondQuad) //thrid quad function
 {
     int rx,ry;
     static int oTime=logiTime;
@@ -528,3 +561,65 @@ int Yquad(int quad)
         }
     return 1;
 }
+void second(drunkMan * man,sniper* sni) //second sniper function
+    {
+        int rx[8]={1,-1,0,0,-1,-1,1,1},ry[8]={0,0,1,-1,1,-1,1,-1},s1,s2,rate;
+        bool inflag=0;
+        rate=rand()%10+1;
+        if(sni->accuracy<10)
+            {
+                sni->accuracy++;
+            }
+        if(sni->cnt==10)
+        {
+            for(int i=0;i<8;++i)
+                {
+                    s1=sni->location[0];
+                    s2=sni->location[1];
+                    if(i<4)
+                        {
+                            sni->around[i][0]=s1+rx[i];
+                            sni->around[i][1]=s2+ry[i];
+                            if(where(sni->around[i][0],sni->around[i][1])!=sni->quad)
+                                {
+                                    sni->around[i][0]= -1;
+                                    sni->around[i][1]= -1;
+                                }
+                        }
+                    else
+                    {
+                        sni->around[i][0]=s1+rx[i];
+                        sni->around[i][1]=s2+ry[i];
+                        if(where(sni->around[i][0],sni->around[i][1])!=sni->quad)
+                                {
+                                    sni->around[i][0]= -1;
+                                    sni->around[i][1]= -1;
+                                }
+                    }
+                }
+        }
+        for(int i=0;i<8;++i) 
+            {
+                if(man->location[0]==sni->around[i][0] && man->location[1]==sni->around[i][1])
+                    {
+                        inflag=1;
+                    }
+            }
+        if(inflag==1)
+        {
+            if(rate==sni->accuracy||sni->accuracy==10)
+                {
+                    man->status= -1;
+                    printf("\n 사망했습니다 !\n");
+                    sleep(10);
+                }
+            else
+            {
+                rate=rand()%10+1;
+                printf("\n 못맞췄습니다!%d\n",sni->accuracy);
+                sleep(1);
+            }
+
+
+        }
+    }
