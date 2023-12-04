@@ -62,7 +62,7 @@ int main()
         while(1){};
         return 0;
     }
-void tmpmain()
+void tmpmain() // 가 메인 함수
     {
         srand(time(NULL));
         int speed,l;
@@ -86,9 +86,9 @@ void tmpmain()
         move(speed,&man,&sni,&w,&h);
     }
 
-void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
+void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h) // 이동함수
     {
-        int rx,ry,ox,oy,secondQuad=rand()%4+1;
+        int rx,ry,ox,oy,secondQuad=rand()%4+1,homeCnt=0;
         while(secondQuad==man->quad||secondQuad==sni->quad||secondQuad==w->quad)
             {
                 secondQuad=rand()%4+1;
@@ -170,9 +170,35 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                 sleep(5/speed);
                 system("clear");
             }
-        if(man->status== -2)
+        while(man->status== -2)
         {
-
+            printMap(sni);
+            homeCnt++;
+            logiTime++;
+            ox=man->location[0];
+            oy=man->location[1];
+            map[ox][oy]=0;
+            randomGo(&rx,&ry);
+            rx=ox+rx;
+            ry=oy+ry;
+            while((rx<0||rx>9||ry<0||ry>9)||map[rx][ry]==1||man->visitedQuad[where(rx,ry)-1]==1)
+                {
+                    randomGo(&rx,&ry);
+                    rx=ox+rx;
+                    ry=oy+ry;
+                }
+            map[rx][ry]=lman;
+            man->location[0]=rx;
+            man->location[1]=ry;
+            if(man->location[0]==h->location[0]&&man->location[1]==h->location[1])
+                {
+                    man->status=0;
+                    printf("\n 붙잡혀 집에 도착했습니다\n %d번만에 \n",homeCnt);
+                    return;
+                }  
+            sleep(5/speed);
+            system("clear");
+            
         }
         return;
     }
@@ -199,7 +225,7 @@ int where(int x,int y) // To find out where it is in the fourth quadrant
     }
 
 
-void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
+void locationSet(drunkMan * man,sniper * sni,wife * w,home * h) // 위치 설정 함수
 {
     int rx,ry,wStore;
     rx=rand()%10;
@@ -274,7 +300,7 @@ void locationSet(drunkMan * man,sniper * sni,wife * w,home * h)
     sni->location[1]=ry;
 }
 
-void printMap(sniper * sni)
+void printMap(sniper * sni) //맵 출력 함수
 {
     for(int i=0;i<10;++i)
         {
@@ -327,7 +353,7 @@ void printMap(sniper * sni)
         }
     printf("\n<< logi Time : %d>>\n",logiTime);
 }
-void randomGo(int * rx,int * ry )
+void randomGo(int * rx,int * ry ) // 랜덤 이동 함수
     {
 
         int d=rand()%4+1;
@@ -377,7 +403,7 @@ void thirdRandom(int secondQuad,drunkMan* man) //thrid quad function
             map[rx][ry]=0;
         }
 }
-int Xquad(int quad)
+int Xquad(int quad) // x 만들기 함수
 {
     int rx;
     rx=rand()%10;
@@ -399,7 +425,7 @@ int Xquad(int quad)
         }
     return 1;
 }
-int Yquad(int quad)
+int Yquad(int quad) // y 만들기 함수
 {
     int ry=rand()%10;
     if(quad==1||quad==3)
@@ -486,7 +512,7 @@ void second(drunkMan * man,sniper* sni) //second sniper function
 
         }
     }
-void mapSet()
+void mapSet() // 기본 맵 세팅
 {
     int wall[10][10]={ {0,1,4}, {6,7,8}, {1,3,4}, {6,9}, {1,2,4}, {0}, {1,2,4,6,8}, {8},{1,2,3,4,6,8}};
     for(int i=0;i<10;++i)
@@ -501,7 +527,7 @@ void mapSet()
         }
     map[0][0]=1;
 }
-void four(drunkMan *man,wife* w,sniper* sni)
+void four(drunkMan *man,wife* w,sniper* sni) //4 사분면 함수
 {
     int ox,oy,rx,ry,kx[8]={1,-1,0,0,-1,-1,1,1},ky[8]={0,0,1,-1,1,-1,1,-1},inflag=0;
     ox=w->location[0];
@@ -530,7 +556,7 @@ void four(drunkMan *man,wife* w,sniper* sni)
         }
     if(inflag==1)
         {
-
+            man->status= -2;
         }
     else
     {
@@ -549,7 +575,7 @@ void four(drunkMan *man,wife* w,sniper* sni)
         
     }
 }
-int cntWall(int secondQuad)
+int cntWall(int secondQuad) //벽 세기 함수
 {
     int rx,ry,cnt=0;
     rx=Xquad(secondQuad);
