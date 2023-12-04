@@ -33,6 +33,7 @@ typedef struct wife
     int quad;
     int around[10][10];
     int location[2];
+    int cnt;
 }wife;
 typedef struct home
 {
@@ -51,7 +52,7 @@ void second(drunkMan* man,sniper* sni);
 void thirdRandom(int secondQuad,drunkMan* man);
 int Xquad(int quad);
 int Yquad(int quad);
-void four(drunkMan *man,wife *w);
+void four(drunkMan *man,wife *w,sniper *sni);
 void mapSet();
 int cntWall(int secondQuad);
 int main()
@@ -75,6 +76,7 @@ void tmpmain()
                 man.visitedQuad[i]=0;
             }
         wife w;
+        w.cnt=0;
         sniper sni;
         home h;
         sni.cnt=0;
@@ -146,6 +148,10 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                     {
                         second(man,sni);
                     }
+                if(man->quad==w->quad)
+                {
+                    four(man,w,sni);
+                }
                 if(man->location[0]==h->location[0]&&man->location[1]==h->location[1])
                     {
                         man->status=0;
@@ -156,6 +162,10 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h)
                 sleep(5/speed);
                 system("clear");
             }
+        if(man->status== -2)
+        {
+
+        }
         return;
     }
 int where(int x,int y) // To find out where it is in the fourth quadrant
@@ -309,48 +319,6 @@ void printMap(sniper * sni)
         }
     printf("\n<< logi Time : %d>>\n",logiTime);
 }
-int rangeX(int quad)
-    {
-        int rx=rand()%10;
-        if(quad==1 || quad==2)
-            {
-                while(rx>=5)
-                    {
-                        rx=rand()%10;
-                    }
-                return rx;
-            }
-        if(quad==3 || quad==4)
-            {
-                while(rx<5)
-                    {
-                        rx=rand()%10;
-                    }
-                return rx;
-            }
-        return 0;
-    }
-int rangeY(int quad)
-    {
-        int ry=rand()%10;
-        if(quad==1||quad==3)
-            {
-                while(ry>=5)
-                    {
-                        ry=rand()%10;
-                    }
-                return  ry;
-            }
-        if(quad==2||quad==4)
-            {
-                while(ry<5)
-                    {
-                        ry=rand()%10;
-                    }
-                return ry;
-            }
-        return 0;
-    }
 void randomGo(int * rx,int * ry )
     {
 
@@ -493,13 +461,15 @@ void second(drunkMan * man,sniper* sni) //second sniper function
             if(rate==sni->accuracy||sni->accuracy==10)
                 {
                     man->status= -1;
+                    system("clear");
+                    printMap(sni);
                     printf("\n 사망했습니다 !\n");
                     sleep(10);
                 }
             else
             {
                 rate=rand()%10+1;
-                printf("\n 못맞췄습니다!%d\n",sni->accuracy);
+                printf("\n 못맞췄습니다!\n");
             }
 
 
@@ -520,10 +490,72 @@ void mapSet()
         }
     map[0][0]=1;
 }
-void four(drunkMan *man,wife* w)
+void four(drunkMan *man,wife* w,sniper* sni)
 {
-    
-
+    int rx,ry,ox,oy,kx[8]={1,-1,0,0,-1,-1,1,1},ky[8]={0,0,1,-1,1,-1,1,-1},w1,w2,inflag=0;
+    ox=w->location[0];
+    oy=w->location[1];
+    rx=0;
+    ry=0;
+    w->cnt++;
+    for(int i=0;i<8;++i)
+        {
+            w1=w->location[0];
+            w2=w->location[1];
+            if(i<4)
+                {
+                    w->around[i][0]=w1+kx[i];
+                    w->around[i][1]=w2+ky[i];
+                    if(map[rx][ry]==lhome)
+                        {
+                            w->around[i][0]= -1;
+                            w->around[i][1]= -1;
+                        }
+                }
+            else
+            {
+                w->around[i][0]=w1+kx[i];
+                w->around[i][1]=w2+ky[i];
+                if(map[rx][ry]==lhome)
+                    {
+                        w->around[i][0]= -1;
+                        w->around[i][1]= -1;
+                    }
+            }
+        }
+    for(int i=0;i<8;++i) 
+    {
+        if(man->location[0]==w->around[i][0] && man->location[1]==w->around[i][1])
+            {
+                inflag=1;
+            }
+    }
+    if(inflag==1)
+        {
+            system("clear");
+            printMap(sni);
+            printf("\n붙잡았습니다!\n");
+            man->status= -2;
+            sleep(10);
+        }
+    if(w->cnt>=5)
+        {
+            
+            map[ox][oy]=0;
+            randomGo(&rx,&ry);
+            rx=rx+ox;
+            ry=ry+oy;
+            while((rx<0||rx>9||ry<0||ry>9)|| map[rx][ry]==1 || man->visitedQuad[where(rx,ry)-1]==1
+            ||map[rx][ry]==lhome)
+                {
+                    randomGo(&rx,&ry);
+                    rx=rx+ox;
+                    ry=ry+oy;
+                }
+            map[rx][ry]=lwife;
+            man->location[0]=rx;
+            man->location[1]=ry;
+        }
 }
 int cntWall(int secondQuad)
 {
