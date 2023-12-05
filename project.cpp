@@ -194,6 +194,7 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h) // 이동함�
                 {
                     man->status=0;
                     printf("\n 붙잡혀 집에 도착했습니다\n %d번만에 \n",homeCnt);
+                    sleep(10);
                     return;
                 }  
             sleep(5/speed);
@@ -557,6 +558,7 @@ void four(drunkMan *man,wife* w,sniper* sni) //4 사분면 함수
     if(inflag==1)
         {
             man->status= -2;
+            sleep(5);
         }
     else
     {
@@ -572,6 +574,19 @@ void four(drunkMan *man,wife* w,sniper* sni) //4 사분면 함수
         map[rx][ry]=lwife;
         w->location[0]=rx;
         w->location[1]=ry;
+    }
+    for(int i=0;i<8;++i)
+    {
+        if(i<4)
+            {
+                w->around[i][0]=ox+kx[i];
+                w->around[i][1]=oy+ky[i];
+            }
+        else
+            {
+                w->around[i][0]=ox+kx[i];
+                w->around[i][1]=oy+ky[i];
+            }
         
     }
 }
