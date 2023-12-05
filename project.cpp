@@ -170,6 +170,8 @@ void move(int speed,drunkMan * man,sniper * sni,wife * w,home * h) // 이동함�
                 sleep(5/speed);
                 system("clear");
             }
+
+       
         while(man->status== -2)
         {
             printMap(sni);
@@ -496,7 +498,6 @@ void second(drunkMan * man,sniper* sni) //second sniper function
             if(rate<=sni->accuracy||sni->accuracy==10)
                 {
                     man->status= -1;
-                    sleep(1);
                     system("clear");
                     printMap(sni);
                     printf("\n 사망했습니다 !\n");
@@ -558,7 +559,9 @@ void four(drunkMan *man,wife* w,sniper* sni) //4 사분면 함수
     if(inflag==1)
         {
             man->status= -2;
-            sleep(5);
+            printf("\n붙잡혔습니다 !\n");
+            printf("\n집으로 돌아갑니다...\n");
+            sleep(3);
         }
     else
     {
