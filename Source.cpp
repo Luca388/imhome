@@ -401,7 +401,6 @@ void thirdRandom(int secondQuad, drunkMan* man) //thrid quad function
             ry = Yquad(secondQuad);
         }
         oTime = logiTime;
-        Sleep(1000);
         map[rx][ry] = 0;
     }
 }
