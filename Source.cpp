@@ -340,7 +340,7 @@ void printMap(sniper* sni) //맵 출력 함수
                     {
                         if (sni->accuracy == i && sni->accuracy != 10)
                         {
-                            printf("%d", i * 10);
+                            printf("%d", i);
                         }
                     }
                     if (sni->accuracy == 10)
