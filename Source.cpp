@@ -557,11 +557,12 @@ void four(drunkMan* man, wife* w, sniper* sni) //4 사분면 함수
     if (inflag == 1)
     {
         man->status = -2;
+        map[w->location[0]][w->location[1]]=lwife;
         system("cls");
         printMap(sni);
         printf("\n붙잡혔습니다 !\n");
         printf("\n집으로 돌아갑니다...\n");
-        Sleep(3 * 1000);
+        Sleep(5 * 1000);
         system("cls");
     }
     else
